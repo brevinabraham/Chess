@@ -1,5 +1,7 @@
 import pandas as pd
-class chess:
+
+
+class Chess:
     def gameinit(self):
         self.outcomestatus = False
         while self.outcomestatus == False:
@@ -16,12 +18,25 @@ class chess:
 
     def update(self, player, piece, movefrom, moveto):
         if player == piece[0]:
-            deletestatus = self.delete(piece, movefrom)
-            if deletestatus == True:
-                addstatus = self.add(piece, moveto)
-                self.updatedboard = True
+            validity = self.is_valid(piece[1:3],player,movefrom,moveto)
+            if validity:
+                deletestatus = self.delete(piece, movefrom)
+                if deletestatus == True:
+                    addstatus = self.add(piece, moveto)
+                    self.updatedboard = True
+            else:
+                print("Invalid piece move")
         else:
             print("check input")
+
+    def is_valid(self,piece,colour,start,end):
+        if piece == 'pn':
+            validity = Pawn.valid_move(self,colour,start,end)
+        elif piece == 'rk':
+            validity = Rook.valid_move(self,colour,start,end)
+
+        
+        return validity
         
 
     def add(self, piece, moveto):#need to add conditions on the pieces to see if it can be added
@@ -84,5 +99,50 @@ class chess:
     '''
     #need to create the pieces themselves
 
+class Pawn(Chess):
+    def valid_move(self,colour,start,end):
+        direction = -1 if colour == 'w' else 1
 
-chess()
+        rankchange = ord(end[0]) - ord(start[0])
+        filechange = int(end[1]) - int(start[1])
+
+        if filechange == direction and rankchange == 0 and self.board.loc[int(end[1]),end[0]] == '0000':
+            return True
+        elif filechange == 2*direction and rankchange == 0 and self.board.loc[int(end[1]),end[0]] == '0000':
+            if (direction == -1 and int(start[1]) == 6) or (direction == 1 and int(start[1]) == 1):
+                return True
+        elif abs(rankchange) == 1 and abs(filechange) == 1 and self.board.loc[int(end[1]),end[0]] != '0000' \
+         and self.board.loc[int(end[1]),end[0]][0] != colour:
+            if (direction == -1 and filechange < 0) or \
+                 (direction == 1 and filechange > 0):
+                return True
+        
+        return False
+    
+class Rook(Chess):
+    def valid_move(self,colour,start,end):
+        if start[0] == end[0] or start[1] == end[1]:
+
+            rankchange = ord(end[0]) - ord(start[0])
+            filechange = int(end[1]) - int(start[1])
+            
+            step_rank = 0 if rankchange == 0 else int(rankchange / abs(rankchange))
+            step_file = 0 if filechange == 0 else int(filechange / abs(filechange))
+
+            rank = ord(start[0]) + step_rank
+            file = int(start[1]) + step_file
+            move = chr(rank)+str(file)
+            while move != end:
+                if self.board.loc[file,chr(rank)] != '0000':
+                    return False
+                rank += step_rank
+                file += step_file
+                move = chr(rank)+str(file)
+            
+            if self.board.loc[int(end[1]),end[0]] == '0000' or self.board.loc[int(end[1]),end[0]][0] != colour:
+                return True
+
+        return False
+
+
+Chess()

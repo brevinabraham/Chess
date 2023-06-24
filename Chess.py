@@ -34,6 +34,8 @@ class Chess:
             validity = Pawn.valid_move(self,colour,start,end)
         elif piece == 'rk':
             validity = Rook.valid_move(self,colour,start,end)
+        elif piece == 'kt':
+            validity = Knight.valid_move(self,colour,start,end)
 
         
         return validity
@@ -144,5 +146,17 @@ class Rook(Chess):
 
         return False
 
+class Knight(Chess):
+    def valid_move(self,colour,start,end):
+        rankchange = abs(ord(end[0]) - ord(start[0]))
+        filechange = abs(int(end[1]) - int(start[1]))
+
+        if (rankchange == 2 and filechange == 1) or (rankchange == 1 and filechange == 2):
+            if self.board.loc[int(end[1]),end[0]] == '0000' or self.board.loc[int(end[1]),end[0]][0] != colour:
+                return True
+        return False
+
 
 Chess()
+
+
